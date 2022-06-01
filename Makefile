@@ -55,7 +55,7 @@ disable:
 	gnome-extensions disable "pop-shell@system76.com"
 
 listen:
-	journalctl -o cat -n 0 -f "$$(which gnome-shell)" | grep -v warning
+	journalctl -o cat -n 0 -f "$$(which gnome-shell)" 
 
 local-install: depcheck compile install configure restart-shell enable
 
@@ -63,9 +63,11 @@ install:
 	rm -rf $(INSTALLBASE)/$(INSTALLNAME)
 	mkdir -p $(INSTALLBASE)/$(INSTALLNAME) $(PLUGIN_BASE) $(SCRIPTS_BASE)
 	cp -r _build/* $(INSTALLBASE)/$(INSTALLNAME)/
+	# see debian/install for extras that you'll want for settings config
 
 uninstall:
 	rm -rf $(INSTALLBASE)/$(INSTALLNAME)
+	rm -rf $(DESTDIR)/usr/lib/pop-shell
 
 restart-shell:
 	echo "Restart shell!"
