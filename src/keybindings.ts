@@ -16,7 +16,11 @@ export class Keybindings {
         this.ext = ext;
         this.global = {
             "activate-launcher": () => ext.window_search.open(ext),
-            "tile-enter": () => ext.tiler.enter(ext)
+            "tile-enter": () => ext.tiler.enter(ext),
+            "tile-move-left": () => ext.tiler.move_left(ext),
+            "tile-move-down": () => ext.tiler.move_down(ext),
+            "tile-move-up": () => ext.tiler.move_up(ext),
+            "tile-move-right": () => ext.tiler.move_right(ext)
         };
 
         this.window_focus = {

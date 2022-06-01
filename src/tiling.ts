@@ -45,10 +45,6 @@ export class Tiler {
     constructor(ext: Ext) {
         this.keybindings = {
             "management-orientation": () => this.toggle_orientation(ext),
-            "tile-move-left": () => this.move_left(ext),
-            "tile-move-down": () => this.move_down(ext),
-            "tile-move-up": () => this.move_up(ext),
-            "tile-move-right": () => this.move_right(ext),
             "tile-resize-left": () => this.resize(ext, Direction.Left),
             "tile-resize-down": () => this.resize(ext, Direction.Down),
             "tile-resize-up": () => this.resize(ext, Direction.Up),
@@ -188,6 +184,11 @@ export class Tiler {
     }
 
     move(ext: Ext, x: number, y: number, w: number, h: number, direction: Direction, focus: () => window.ShellWindow | number | null) {
+        const do_enter = !this.window;
+        if (do_enter) {
+            this._fast_enter(ext);
+        }
+
         if (!this.window) return;
         const win = ext.windows.get(this.window)
         if (!win) return
@@ -212,6 +213,11 @@ export class Tiler {
                             this.move_from_stack(ext, s, focused, direction);
                             this.moving = false;
                             place_pointer()
+
+                            if (do_enter) {
+                                this._fast_exit();
+                            }
+
                             return;
                         }
                     }
@@ -219,6 +225,10 @@ export class Tiler {
                     if (move_to !== null) this.move_auto(ext, focused, move_to, direction === Direction.Left);
                     this.moving = false;
                     place_pointer()
+
+                    if (do_enter) {
+                        this._fast_exit();
+                    }
                 }
             })
         } else {
@@ -227,6 +237,9 @@ export class Tiler {
                 this.change(ext.overlay, rect, x, y, w, h)
                     .change(ext.overlay, rect, 0, 0, 0, 0);
             });
+            if (do_enter) {
+                this._fast_exit();
+            }
         }
     }
 
@@ -688,6 +701,19 @@ export class Tiler {
         }
     }
 
+    _fast_enter(ext: Ext) {
+        if (!this.window) {
+            const win = ext.focus_window();
+            if (!win) return;
+
+            this.window = win.entity;
+
+            if (win.is_maximized()) {
+                win.meta.unmaximize(Meta.MaximizeFlags.BOTH);
+            }
+        }
+    }
+
     enter(ext: Ext) {
         if (!this.window) {
             const win = ext.focus_window();
@@ -753,6 +779,14 @@ export class Tiler {
         this.swap_window = null;
 
         this.exit(ext);
+    }
+
+    _fast_exit() {
+        this.queue.clear()
+
+        if (this.window) {
+            this.window = null;
+        }
     }
 
     exit(ext: Ext) {
